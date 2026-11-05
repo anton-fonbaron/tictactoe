@@ -1,11 +1,8 @@
-"""Web-модель игрового поля (DTO для обмена с клиентом)."""
-
 from dataclasses import dataclass
 
-@dataclass
-class GameFieldModel:
-    """Игровое поле в виде JSON-совместимой матрицы 3x3."""
 
+@dataclass(slots=True)
+class GameFieldModel:
     matrix: list[list[int]]
 
     @staticmethod

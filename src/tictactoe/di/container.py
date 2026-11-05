@@ -1,18 +1,13 @@
-"""DI-слой: контейнер зависимостей (граф зависимостей приложения)."""
-
 from tictactoe.datasource.game_storage import GameStorage
 from tictactoe.datasource.repository.game_repository import GameRepository
-from tictactoe.datasource.repository.game_repository_interface import GameRepositoryInterface
+from tictactoe.domain.repository.game_repository_interface import (
+    GameRepositoryInterface,
+)
 from tictactoe.domain.service.game_service import GameService
 from tictactoe.domain.service.game_service_interface import GameServiceInterface
 
+
 class Container:
-    """Контейнер зависимостей.
-
-    Граф зависимостей:
-        GameStorage (singleton) <- GameRepository <- GameService
-    """
-
     def __init__(self) -> None:
         self._game_storage = GameStorage()
 

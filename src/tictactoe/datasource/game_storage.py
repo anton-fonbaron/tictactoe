@@ -1,27 +1,24 @@
-"""Класс-хранилище текущих игр на потокобезопасных коллекциях."""
-
 import threading
 from uuid import UUID
 
 from tictactoe.datasource.model.current_game import CurrentGameEntity
 
-class GameStorage:
-    """Потокобезопасное хранилище текущих игр (словарь UUID -> сущность игры)."""
 
+class GameStorage:
     def __init__(self) -> None:
         self._games: dict[UUID, CurrentGameEntity] = {}
         self._lock = threading.RLock()
 
     def save(self, game: CurrentGameEntity) -> None:
         with self._lock:
-            self._games[game.id] = game
+            self._games[game.id] = game.copy()
 
     def get(self, game_id: UUID) -> CurrentGameEntity | None:
         with self._lock:
             game = self._games.get(game_id)
             if game is None:
                 return None
-            return CurrentGameEntity(id=game.id, field=game.field.copy())
+            return game.copy()
 
     def remove(self, game_id: UUID) -> None:
         with self._lock:

@@ -3,7 +3,8 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from tictactoe.domain.model.game_field import GameField, PLAYER_X, PLAYER_O
+from tictactoe.domain.model.game_field import PLAYER_O, PLAYER_X, GameField
+
 
 @dataclass
 class CurrentGame:
@@ -18,4 +19,8 @@ class CurrentGame:
     @property
     def current_mark(self) -> int:
         """Чей ход должен быть сейчас (X при равенстве меток, иначе O)."""
-        return PLAYER_X if self.field.count(PLAYER_X) == self.field.count(PLAYER_O) else PLAYER_O
+        return (
+            PLAYER_X
+            if self.field.count(PLAYER_X) == self.field.count(PLAYER_O)
+            else PLAYER_O
+        )

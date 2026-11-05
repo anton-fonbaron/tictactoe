@@ -1,5 +1,3 @@
-"""Реализация репозитория поверх класса-хранилища GameStorage."""
-
 from uuid import UUID
 
 from tictactoe.datasource.game_storage import GameStorage
@@ -7,12 +5,13 @@ from tictactoe.datasource.mapper.game_mappers import (
     domain_game_to_entity,
     entity_to_domain_game,
 )
-from tictactoe.datasource.repository.game_repository_interface import GameRepositoryInterface
 from tictactoe.domain.model.current_game import CurrentGame
+from tictactoe.domain.repository.game_repository_interface import (
+    GameRepositoryInterface,
+)
+
 
 class GameRepository(GameRepositoryInterface):
-    """Репозиторий текущих игр, работающий с потокобезопасным хранилищем."""
-
     def __init__(self, storage: GameStorage) -> None:
         self._storage = storage
 

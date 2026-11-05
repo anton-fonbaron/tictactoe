@@ -1,8 +1,5 @@
-"""Реализация сервиса бизнес-логики, принимающая репозиторий через конструктор."""
-
 from uuid import UUID, uuid4
 
-from tictactoe.datasource.repository.game_repository_interface import GameRepositoryInterface
 from tictactoe.domain.model.current_game import CurrentGame
 from tictactoe.domain.model.game_field import (
     GameField,
@@ -11,20 +8,18 @@ from tictactoe.domain.model.game_field import (
     SIZE,
     EMPTY,
 )
+from tictactoe.domain.repository.game_repository_interface import (
+    GameRepositoryInterface,
+)
 from tictactoe.domain.service.game_service_interface import GameServiceInterface
 from tictactoe.domain.service.minimax import find_best_move
 
+
 class GameService(GameServiceInterface):
-    """Сервис крестиков-ноликов поверх репозитория текущих игр.
-
-    Человек играет за X, компьютер - за O (алгоритм Минимакс).
-    """
-
     def __init__(self, repository: GameRepositoryInterface) -> None:
         self._repository = repository
 
     def create_game(self) -> CurrentGame:
-        """Создаёт новую игру и сохраняет её в репозитории."""
         game = CurrentGame(id=uuid4(), field=GameField())
         self._repository.save(game)
         return game
@@ -32,28 +27,24 @@ class GameService(GameServiceInterface):
     def get_game(self, game_id: UUID) -> CurrentGame | None:
         return self._repository.get(game_id)
 
-    def make_move_and_get_answer(self, game_id: UUID, incoming: CurrentGame) -> CurrentGame:
-        """Обрабатывает ход пользователя: валидация, сохранение, ответ компьютера.
-
-        Возвращает игру с добавленным ходом компьютера (если игра ещё не окончена).
-        Бросает ValueError с описанием, если передана некорректная игра.
-        """
+    def make_move_and_get_answer(
+        self, game_id: UUID, incoming: CurrentGame
+    ) -> CurrentGame:
         stored = self._repository.get(game_id)
         if stored is None:
             raise ValueError(f"Игра с идентификатором {game_id} не найдена.")
 
-        incoming.id = game_id
-        self.validate_field(incoming, previous=stored.field)
-        self._repository.save(incoming)
+        game = CurrentGame(id=game_id, field=incoming.field)
+        self.validate_field(game, previous=stored.field)
+        self._repository.save(game)
 
-        if self.is_game_over(incoming):
-            return incoming
+        if self.is_game_over(game):
+            return game
 
-        return self.get_next_move(incoming)
+        return self.get_next_move(game)
 
     def get_next_move(self, game: CurrentGame) -> CurrentGame:
-        """Ход компьютера по алгоритму Минимакс; сохраняет результат в репозитории."""
-        result = game.copy() if hasattr(game, "copy") else CurrentGame(id=game.id, field=game.field.copy())
+        result = game.copy()
         move = find_best_move(result.field, ai_player=PLAYER_O)
         if move is not None:
             row, col = move
@@ -61,10 +52,9 @@ class GameService(GameServiceInterface):
         self._repository.save(result)
         return result
 
-    def validate_field(self, game: CurrentGame, previous: GameField | None = None) -> None:
-        """Валидация игрового поля: структура, счётчики меток, очередность ходов,
-        неизменность предыдущих ходов (поле previous), запрет победы у обоих игроков.
-        """
+    def validate_field(
+        self, game: CurrentGame, previous: GameField | None = None
+    ) -> None:
         matrix = game.field.matrix
 
         if len(matrix) != SIZE or any(len(row) != SIZE for row in matrix):
@@ -86,13 +76,19 @@ class GameService(GameServiceInterface):
                 "X ходит первым, разница может быть не больше одного хода."
             )
 
-        winner_x = self._has_win_for(game.field, PLAYER_X)
-        winner_o = self._has_win_for(game.field, PLAYER_O)
+        winner = game.field.winner()
+        winner_x = winner == PLAYER_X
+        winner_o = winner == PLAYER_O
 
         if winner_x and winner_o:
-            raise ValueError("На поле одновременно два победителя - такого быть не может.")
+            raise ValueError(
+                "На поле одновременно два победителя - такого быть не может."
+            )
 
         if previous is not None:
+            if previous.winner() is not None:
+                raise ValueError("Игра уже окончена: продолжать ходы нельзя.")
+
             changed: list[tuple[int, int]] = []
             added: list[tuple[int, int]] = []
             for r in range(SIZE):
@@ -108,18 +104,15 @@ class GameService(GameServiceInterface):
                 raise ValueError(
                     f"Изменены предыдущие ходы: клетки {changed}. Это запрещено."
                 )
-            if len(added) > 1:
+            if len(added) != 1:
                 raise ValueError(
-                    f"За один запрос можно добавить ровно один ход, добавлено: {len(added)}."
+                    f"За один запрос нужно добавить ровно один ход, добавлено: {len(added)}."
                 )
-            if self._has_win_for(previous, PLAYER_X) or self._has_win_for(previous, PLAYER_O):
-                raise ValueError("Игра уже окончена: продолжать ходы нельзя.")
-            if added:
-                r, c = added[0]
-                if matrix[r][c] != PLAYER_X:
-                    raise ValueError(
-                        "Пользователь играет за X (1): новый ход должен ставить метку 1."
-                    )
+            r, c = added[0]
+            if matrix[r][c] != PLAYER_X:
+                raise ValueError(
+                    "Пользователь играет за X (1): новый ход должен ставить метку 1."
+                )
 
         if winner_x and count_x != count_o + 1:
             raise ValueError("Победа X невозможна при текущем количестве меток.")
@@ -127,9 +120,4 @@ class GameService(GameServiceInterface):
             raise ValueError("Победа O невозможна при текущем количестве меток.")
 
     def is_game_over(self, game: CurrentGame) -> bool:
-        """Игра окончена, если есть победитель или поле заполнено."""
         return game.field.winner() is not None or game.field.is_full()
-
-    @staticmethod
-    def _has_win_for(field: GameField, mark: int) -> bool:
-        return field.winner() == mark

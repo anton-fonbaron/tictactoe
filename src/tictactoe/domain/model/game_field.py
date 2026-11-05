@@ -1,5 +1,3 @@
-"""Доменная модель игрового поля: целочисленная матрица 3x3."""
-
 from dataclasses import dataclass, field
 
 EMPTY = 0
@@ -18,10 +16,9 @@ WIN_LINES = [
     ((0, 2), (1, 1), (2, 0)),
 ]
 
-@dataclass
-class GameField:
-    """Игровое поле - целочисленная матрица 3x3 (0 - пусто, 1 - X, 2 - O)."""
 
+@dataclass(slots=True)
+class GameField:
     matrix: list[list[int]] = field(
         default_factory=lambda: [[EMPTY] * SIZE for _ in range(SIZE)]
     )
@@ -41,7 +38,6 @@ class GameField:
         ]
 
     def winner(self) -> int | None:
-        """Возвращает PLAYER_X / PLAYER_O, либо None, если победителя нет."""
         for (r1, c1), (r2, c2), (r3, c3) in WIN_LINES:
             v = self.matrix[r1][c1]
             if v != EMPTY and v == self.matrix[r2][c2] == self.matrix[r3][c3]:

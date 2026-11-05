@@ -1,13 +1,13 @@
-"""Datasource-модель текущей игры (модель хранения)."""
-
 from dataclasses import dataclass
 from uuid import UUID
 
 from tictactoe.datasource.model.game_field import GameFieldEntity
 
-@dataclass
-class CurrentGameEntity:
-    """Текущая игра в слое хранения: UUID + сущность игрового поля."""
 
+@dataclass(slots=True)
+class CurrentGameEntity:
     id: UUID
     field: GameFieldEntity
+
+    def copy(self) -> "CurrentGameEntity":
+        return CurrentGameEntity(id=self.id, field=self.field.copy())

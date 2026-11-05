@@ -5,6 +5,7 @@ from uuid import UUID
 
 from tictactoe.domain.model.current_game import CurrentGame
 
+
 class GameRepositoryInterface(ABC):
     """Репозиторий для сохранения и получения текущих игр."""
 
