@@ -1,3 +1,5 @@
+"""Доменная модель игрового поля: целочисленная матрица 3x3."""
+
 from dataclasses import dataclass, field
 
 EMPTY = 0
@@ -19,6 +21,8 @@ WIN_LINES = [
 
 @dataclass(slots=True)
 class GameField:
+    """Игровое поле - целочисленная матрица 3x3 (0 - пусто, 1 - X, 2 - O)."""
+
     matrix: list[list[int]] = field(
         default_factory=lambda: [[EMPTY] * SIZE for _ in range(SIZE)]
     )
@@ -37,12 +41,17 @@ class GameField:
             if self.matrix[r][c] == EMPTY
         ]
 
-    def winner(self) -> int | None:
+    def winners(self) -> set[int]:
+        result: set[int] = set()
         for (r1, c1), (r2, c2), (r3, c3) in WIN_LINES:
             v = self.matrix[r1][c1]
             if v != EMPTY and v == self.matrix[r2][c2] == self.matrix[r3][c3]:
-                return v
-        return None
+                result.add(v)
+        return result
+
+    def winner(self) -> int | None:
+        winners = self.winners()
+        return next(iter(winners)) if winners else None
 
     def is_full(self) -> bool:
         return all(self.matrix[r][c] != EMPTY for r in range(SIZE) for c in range(SIZE))

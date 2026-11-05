@@ -1,4 +1,6 @@
-from tictactoe.domain.model.game_field import GameField, PLAYER_X, PLAYER_O, EMPTY
+"""Алгоритм Минимакс для поиска лучшего хода в крестиках-ноликах."""
+
+from tictactoe.domain.model.game_field import EMPTY, PLAYER_O, PLAYER_X, GameField
 
 
 def minimax(
@@ -34,5 +36,5 @@ def minimax(
 def find_best_move(
     field: GameField, ai_player: int = PLAYER_O
 ) -> tuple[int, int] | None:
-    _, move = minimax(field.copy(), ai_player, ai_player)
+    _, move = minimax(field, ai_player, ai_player)
     return move

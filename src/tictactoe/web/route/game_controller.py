@@ -1,14 +1,17 @@
-from dataclasses import replace
+"""Контроллер Flask: маршруты API крестиков-ноликов."""
+
 from uuid import UUID
 
 from flask import Blueprint, jsonify, request
 
 from tictactoe.domain.service.game_service_interface import GameServiceInterface
-from tictactoe.web.mapper.game_mappers import domain_game_to_web, web_game_to_domain
+from tictactoe.web.mapper.game_mappers import domain_game_to_web, web_field_to_domain
 from tictactoe.web.module.serializers import game_dict_to_model, game_model_to_dict
 
 
 class GameController:
+    """Контроллер, реализующий эндпоинты игры поверх GameServiceInterface."""
+
     def __init__(self, service: GameServiceInterface) -> None:
         self._service = service
         self.blueprint = Blueprint("game", __name__)
@@ -39,9 +42,8 @@ class GameController:
 
         try:
             model = game_dict_to_model(payload)
-            model = replace(model, id=str(game_id))
-            domain_game = web_game_to_domain(model)
-            result = self._service.make_move_and_get_answer(game_id, domain_game)
+            incoming_field = web_field_to_domain(model.field)
+            result = self._service.make_move_and_get_answer(game_id, incoming_field)
         except ValueError as exc:
             return self._error(str(exc), 400)
 

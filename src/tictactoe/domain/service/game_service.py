@@ -1,12 +1,14 @@
+"""Реализация сервиса бизнес-логики, принимающая репозиторий через конструктор."""
+
 from uuid import UUID, uuid4
 
 from tictactoe.domain.model.current_game import CurrentGame
 from tictactoe.domain.model.game_field import (
-    GameField,
-    PLAYER_X,
-    PLAYER_O,
-    SIZE,
     EMPTY,
+    PLAYER_O,
+    PLAYER_X,
+    SIZE,
+    GameField,
 )
 from tictactoe.domain.repository.game_repository_interface import (
     GameRepositoryInterface,
@@ -16,6 +18,11 @@ from tictactoe.domain.service.minimax import find_best_move
 
 
 class GameService(GameServiceInterface):
+    """Сервис крестиков-ноликов поверх репозитория текущих игр.
+
+    Человек играет за X, компьютер - за O (алгоритм Минимакс).
+    """
+
     def __init__(self, repository: GameRepositoryInterface) -> None:
         self._repository = repository
 
@@ -28,14 +35,15 @@ class GameService(GameServiceInterface):
         return self._repository.get(game_id)
 
     def make_move_and_get_answer(
-        self, game_id: UUID, incoming: CurrentGame
+        self, game_id: UUID, incoming_field: GameField
     ) -> CurrentGame:
         stored = self._repository.get(game_id)
         if stored is None:
             raise ValueError(f"Игра с идентификатором {game_id} не найдена.")
 
-        game = CurrentGame(id=game_id, field=incoming.field)
-        self.validate_field(game, previous=stored.field)
+        self.validate_field(incoming_field, previous=stored.field)
+
+        game = CurrentGame(id=game_id, field=incoming_field)
         self._repository.save(game)
 
         if self.is_game_over(game):
@@ -53,9 +61,9 @@ class GameService(GameServiceInterface):
         return result
 
     def validate_field(
-        self, game: CurrentGame, previous: GameField | None = None
+        self, field: GameField, previous: GameField | None = None
     ) -> None:
-        matrix = game.field.matrix
+        matrix = field.matrix
 
         if len(matrix) != SIZE or any(len(row) != SIZE for row in matrix):
             raise ValueError("Игровое поле должно быть матрицей 3x3.")
@@ -67,8 +75,8 @@ class GameService(GameServiceInterface):
                         f"Допустимы 0 (пусто), 1 (X), 2 (O)."
                     )
 
-        count_x = game.field.count(PLAYER_X)
-        count_o = game.field.count(PLAYER_O)
+        count_x = field.count(PLAYER_X)
+        count_o = field.count(PLAYER_O)
 
         if count_x not in (count_o, count_o + 1):
             raise ValueError(
@@ -76,17 +84,16 @@ class GameService(GameServiceInterface):
                 "X ходит первым, разница может быть не больше одного хода."
             )
 
-        winner = game.field.winner()
-        winner_x = winner == PLAYER_X
-        winner_o = winner == PLAYER_O
-
-        if winner_x and winner_o:
+        winners = field.winners()
+        if len(winners) > 1:
             raise ValueError(
                 "На поле одновременно два победителя - такого быть не может."
             )
+        winner_x = PLAYER_X in winners
+        winner_o = PLAYER_O in winners
 
         if previous is not None:
-            if previous.winner() is not None:
+            if previous.winners():
                 raise ValueError("Игра уже окончена: продолжать ходы нельзя.")
 
             changed: list[tuple[int, int]] = []

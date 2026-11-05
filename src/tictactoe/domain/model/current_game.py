@@ -6,7 +6,7 @@ from uuid import UUID
 from tictactoe.domain.model.game_field import PLAYER_O, PLAYER_X, GameField
 
 
-@dataclass
+@dataclass(slots=True)
 class CurrentGame:
     """Текущая игра: идентификатор (UUID) и игровое поле.
 
@@ -15,6 +15,9 @@ class CurrentGame:
 
     id: UUID
     field: GameField
+
+    def copy(self) -> "CurrentGame":
+        return CurrentGame(id=self.id, field=self.field.copy())
 
     @property
     def current_mark(self) -> int:

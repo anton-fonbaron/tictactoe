@@ -1,4 +1,4 @@
-from uuid import UUID
+"""Мапперы domain <-> web."""
 
 from tictactoe.domain.model.current_game import CurrentGame
 from tictactoe.domain.model.game_field import GameField
@@ -12,12 +12,6 @@ def web_field_to_domain(model: GameFieldModel) -> GameField:
 
 def domain_field_to_web(field: GameField) -> GameFieldModel:
     return GameFieldModel(matrix=[list(row) for row in field.matrix])
-
-
-def web_game_to_domain(model: CurrentGameModel) -> CurrentGame:
-    if model.id is None:
-        raise ValueError("Идентификатор игры обязателен.")
-    return CurrentGame(id=UUID(model.id), field=web_field_to_domain(model.field))
 
 
 def domain_game_to_web(
