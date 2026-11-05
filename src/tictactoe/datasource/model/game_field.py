@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 
 SIZE = 3
 
-
 @dataclass
 class GameFieldEntity:
     """Игровое поле в виде целочисленной матрицы 3x3 для слоя хранения."""

@@ -2,7 +2,6 @@
 
 from tictactoe.domain.model.game_field import GameField, PLAYER_X, PLAYER_O, EMPTY
 
-
 def minimax(field: GameField, player: int, ai_player: int) -> tuple[int, tuple[int, int] | None]:
     """Возвращает (оценку позиции, лучший ход) для игрока player.
 
@@ -18,9 +17,9 @@ def minimax(field: GameField, player: int, ai_player: int) -> tuple[int, tuple[i
         return 0, None
 
     best_move: tuple[int, int] | None = None
-    if player == ai_player:  # максимизирующий игрок
+    if player == ai_player:
         best_score = -2
-    else:  # минимизирующий игрок
+    else:
         best_score = 2
 
     for row, col in field.free_cells():
@@ -35,7 +34,6 @@ def minimax(field: GameField, player: int, ai_player: int) -> tuple[int, tuple[i
             best_score, best_move = score, (row, col)
 
     return best_score, best_move
-
 
 def find_best_move(field: GameField, ai_player: int = PLAYER_O) -> tuple[int, int] | None:
     """Лучший ход для ai_player согласно алгоритму Минимакс."""

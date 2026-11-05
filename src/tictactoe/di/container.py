@@ -6,7 +6,6 @@ from tictactoe.datasource.repository.game_repository_interface import GameReposi
 from tictactoe.domain.service.game_service import GameService
 from tictactoe.domain.service.game_service_interface import GameServiceInterface
 
-
 class Container:
     """Контейнер зависимостей.
 
@@ -15,7 +14,6 @@ class Container:
     """
 
     def __init__(self) -> None:
-        # Класс-хранилище — singleton: единственный экземпляр на контейнер.
         self._game_storage = GameStorage()
 
     @property

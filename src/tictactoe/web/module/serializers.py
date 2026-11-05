@@ -3,7 +3,6 @@
 from tictactoe.web.model.current_game import CurrentGameModel
 from tictactoe.web.model.game_field import GameFieldModel
 
-
 def game_model_to_dict(model: CurrentGameModel) -> dict:
     return {
         "id": model.id,
@@ -11,7 +10,6 @@ def game_model_to_dict(model: CurrentGameModel) -> dict:
         "winner": model.winner,
         "isOver": model.is_over,
     }
-
 
 def game_dict_to_model(data: dict) -> CurrentGameModel:
     """Парсит JSON-тело запроса в web-модель. Бросает ValueError с описанием."""

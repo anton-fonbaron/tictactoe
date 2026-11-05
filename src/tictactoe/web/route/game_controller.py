@@ -9,7 +9,6 @@ from tictactoe.domain.service.game_service_interface import GameServiceInterface
 from tictactoe.web.mapper.game_mappers import domain_game_to_web, web_game_to_domain
 from tictactoe.web.module.serializers import game_dict_to_model, game_model_to_dict
 
-
 class GameController:
     """Контроллер, реализующий эндпоинты игры поверх GameServiceInterface."""
 
@@ -24,13 +23,11 @@ class GameController:
             "/game/<uuid_str>", "make_move", self.make_move, methods=["POST"]
         )
 
-    # POST /game — создание новой игры
     def create_game(self):
         game = self._service.create_game()
         model = domain_game_to_web(game)
         return jsonify(game_model_to_dict(model)), 201
 
-    # POST /game/{UUID} — ход пользователя, ответ — ход компьютера
     def make_move(self, uuid_str: str):
         try:
             game_id = UUID(uuid_str)

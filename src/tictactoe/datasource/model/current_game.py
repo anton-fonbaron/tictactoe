@@ -5,7 +5,6 @@ from uuid import UUID
 
 from tictactoe.datasource.model.game_field import GameFieldEntity
 
-
 @dataclass
 class CurrentGameEntity:
     """Текущая игра в слое хранения: UUID + сущность игрового поля."""

@@ -5,20 +5,16 @@ from tictactoe.domain.model.game_field import GameField
 from tictactoe.web.model.current_game import CurrentGameModel
 from tictactoe.web.model.game_field import GameFieldModel
 
-
 def web_field_to_domain(model: GameFieldModel) -> GameField:
     return GameField(matrix=[list(row) for row in model.matrix])
 
-
 def domain_field_to_web(field: GameField) -> GameFieldModel:
     return GameFieldModel(matrix=[list(row) for row in field.matrix])
-
 
 def web_game_to_domain(model: CurrentGameModel) -> CurrentGame:
     from uuid import UUID
 
     return CurrentGame(id=UUID(model.id), field=web_field_to_domain(model.field))
-
 
 def domain_game_to_web(game: CurrentGame, is_over: bool | None = None) -> CurrentGameModel:
     winner = game.field.winner()

@@ -5,12 +5,11 @@ from uuid import UUID
 
 from tictactoe.domain.model.game_field import GameField, PLAYER_X, PLAYER_O
 
-
 @dataclass
 class CurrentGame:
     """Текущая игра: идентификатор (UUID) и игровое поле.
 
-    Человек играет за X, компьютер — за O. X ходит первым.
+    Человек играет за X, компьютер - за O. X ходит первым.
     """
 
     id: UUID

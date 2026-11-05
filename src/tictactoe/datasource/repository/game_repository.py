@@ -10,7 +10,6 @@ from tictactoe.datasource.mapper.game_mappers import (
 from tictactoe.datasource.repository.game_repository_interface import GameRepositoryInterface
 from tictactoe.domain.model.current_game import CurrentGame
 
-
 class GameRepository(GameRepositoryInterface):
     """Репозиторий текущих игр, работающий с потокобезопасным хранилищем."""
 

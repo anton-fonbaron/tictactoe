@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 
-
 @dataclass
 class GameFieldModel:
     """Игровое поле в виде JSON-совместимой матрицы 3x3."""

@@ -5,7 +5,6 @@ from abc import ABC, abstractmethod
 from tictactoe.domain.model.current_game import CurrentGame
 from tictactoe.domain.model.game_field import GameField
 
-
 class GameServiceInterface(ABC):
     """Сервис: следующий ход (Минимакс), валидация поля, проверка окончания игры."""
 

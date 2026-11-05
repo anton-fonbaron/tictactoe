@@ -14,17 +14,14 @@ from tictactoe.domain.model.game_field import (
 from tictactoe.domain.service.game_service_interface import GameServiceInterface
 from tictactoe.domain.service.minimax import find_best_move
 
-
 class GameService(GameServiceInterface):
     """Сервис крестиков-ноликов поверх репозитория текущих игр.
 
-    Человек играет за X, компьютер — за O (алгоритм Минимакс).
+    Человек играет за X, компьютер - за O (алгоритм Минимакс).
     """
 
     def __init__(self, repository: GameRepositoryInterface) -> None:
         self._repository = repository
-
-    # --- публичный API -------------------------------------------------------
 
     def create_game(self) -> CurrentGame:
         """Создаёт новую игру и сохраняет её в репозитории."""
@@ -54,8 +51,6 @@ class GameService(GameServiceInterface):
 
         return self.get_next_move(incoming)
 
-    # --- методы интерфейса ---------------------------------------------------
-
     def get_next_move(self, game: CurrentGame) -> CurrentGame:
         """Ход компьютера по алгоритму Минимакс; сохраняет результат в репозитории."""
         result = game.copy() if hasattr(game, "copy") else CurrentGame(id=game.id, field=game.field.copy())
@@ -72,7 +67,6 @@ class GameService(GameServiceInterface):
         """
         matrix = game.field.matrix
 
-        # 1. Структура матрицы 3x3 и допустимые значения.
         if len(matrix) != SIZE or any(len(row) != SIZE for row in matrix):
             raise ValueError("Игровое поле должно быть матрицей 3x3.")
         for row in matrix:
@@ -86,21 +80,18 @@ class GameService(GameServiceInterface):
         count_x = game.field.count(PLAYER_X)
         count_o = game.field.count(PLAYER_O)
 
-        # 2. Очередность: X ходит первым, поэтому count_x == count_o или count_x == count_o + 1.
         if count_x not in (count_o, count_o + 1):
             raise ValueError(
-                f"Некорректное количество меток: X — {count_x}, O — {count_o}. "
+                f"Некорректное количество меток: X - {count_x}, O - {count_o}. "
                 "X ходит первым, разница может быть не больше одного хода."
             )
 
         winner_x = self._has_win_for(game.field, PLAYER_X)
         winner_o = self._has_win_for(game.field, PLAYER_O)
 
-        # 3. Не может быть двух победителей.
         if winner_x and winner_o:
-            raise ValueError("На поле одновременно два победителя — такого быть не может.")
+            raise ValueError("На поле одновременно два победителя - такого быть не может.")
 
-        # 4. Проверка неизменности предыдущих ходов.
         if previous is not None:
             changed: list[tuple[int, int]] = []
             added: list[tuple[int, int]] = []
@@ -121,10 +112,8 @@ class GameService(GameServiceInterface):
                 raise ValueError(
                     f"За один запрос можно добавить ровно один ход, добавлено: {len(added)}."
                 )
-            # Если победа уже была в предыдущем состоянии, играть дальше нельзя.
             if self._has_win_for(previous, PLAYER_X) or self._has_win_for(previous, PLAYER_O):
                 raise ValueError("Игра уже окончена: продолжать ходы нельзя.")
-            # Пользователь всегда играет за X: его новый ход обязан ставить метку X.
             if added:
                 r, c = added[0]
                 if matrix[r][c] != PLAYER_X:
@@ -132,7 +121,6 @@ class GameService(GameServiceInterface):
                         "Пользователь играет за X (1): новый ход должен ставить метку 1."
                     )
 
-        # 5. После победы X ходов O быть не должно (и наоборот для-consistency).
         if winner_x and count_x != count_o + 1:
             raise ValueError("Победа X невозможна при текущем количестве меток.")
         if winner_o and count_x != count_o:

@@ -5,14 +5,10 @@ from uuid import UUID
 
 from tictactoe.datasource.model.current_game import CurrentGameEntity
 
-
 class GameStorage:
     """Потокобезопасное хранилище текущих игр (словарь UUID -> сущность игры)."""
 
     def __init__(self) -> None:
-        # Потокобезопасность обеспечивается замком: стандартный dict
-        # не является потокобезопасным при записи, поэтому все операции
-        # чтения/записи выполняются под lock.
         self._games: dict[UUID, CurrentGameEntity] = {}
         self._lock = threading.RLock()
 
@@ -25,7 +21,6 @@ class GameStorage:
             game = self._games.get(game_id)
             if game is None:
                 return None
-            # Возвращаем копию, чтобы внешние изменения не ломали хранилище.
             return CurrentGameEntity(id=game.id, field=game.field.copy())
 
     def remove(self, game_id: UUID) -> None:
