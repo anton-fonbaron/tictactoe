@@ -11,4 +11,5 @@ wheels/
 
 *.txt
 *.md
+!README.md
 code_test/

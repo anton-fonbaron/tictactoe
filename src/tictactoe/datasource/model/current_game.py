@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -9,5 +11,5 @@ class CurrentGameEntity:
     id: UUID
     field: GameFieldEntity
 
-    def copy(self) -> "CurrentGameEntity":
+    def copy(self) -> CurrentGameEntity:
         return CurrentGameEntity(id=self.id, field=self.field.copy())

@@ -14,6 +14,7 @@ dependencies = [
 
 [project.scripts]
 flask-app = "tictactoe.app:run_app"
+ttt = "tictactoe.app:run_app"
 ttt-client = "client.main:main"
 test = "client.test_common_scripts:main"
 
