@@ -15,6 +15,7 @@ dependencies = [
 [project.scripts]
 flask-app = "tictactoe.app:run_app"
 ttt-client = "client.main:main"
+test = "client.test_common_scripts:main"
 
 [build-system]
 requires = ["uv_build>=0.13.5,<0.14.0"]
