@@ -4,10 +4,8 @@ from uuid import UUID, uuid4
 
 from tictactoe.domain.model.current_game import CurrentGame
 from tictactoe.domain.model.game_field import (
-    EMPTY,
-    PLAYER_O,
-    PLAYER_X,
     SIZE,
+    CellValue,
     GameField,
 )
 from tictactoe.domain.repository.game_repository_interface import (
@@ -18,10 +16,7 @@ from tictactoe.domain.service.minimax import find_best_move
 
 
 class GameService(GameServiceInterface):
-    """Сервис крестиков-ноликов поверх репозитория текущих игр.
-
-    Человек играет за X, компьютер - за O (алгоритм Минимакс).
-    """
+    """Сервис крестиков-ноликов поверх репозитория текущих игр."""
 
     def __init__(self, repository: GameRepositoryInterface) -> None:
         self._repository = repository
@@ -53,10 +48,10 @@ class GameService(GameServiceInterface):
 
     def get_next_move(self, game: CurrentGame) -> CurrentGame:
         result = game.copy()
-        move = find_best_move(result.field, ai_player=PLAYER_O)
+        move = find_best_move(result.field, ai_player=CellValue.PLAYER_O)
         if move is not None:
             row, col = move
-            result.field.matrix[row][col] = PLAYER_O
+            result.field.matrix[row][col] = CellValue.PLAYER_O
         self._repository.save(result)
         return result
 
@@ -69,14 +64,18 @@ class GameService(GameServiceInterface):
             raise ValueError("Игровое поле должно быть матрицей 3x3.")
         for row in matrix:
             for value in row:
-                if value not in (EMPTY, PLAYER_X, PLAYER_O):
+                if value not in (
+                    CellValue.EMPTY,
+                    CellValue.PLAYER_X,
+                    CellValue.PLAYER_O,
+                ):
                     raise ValueError(
                         f"Недопустимое значение клетки: {value}. "
                         f"Допустимы 0 (пусто), 1 (X), 2 (O)."
                     )
 
-        count_x = field.count(PLAYER_X)
-        count_o = field.count(PLAYER_O)
+        count_x = field.count(CellValue.PLAYER_X)
+        count_o = field.count(CellValue.PLAYER_O)
 
         if count_x not in (count_o, count_o + 1):
             raise ValueError(
@@ -89,8 +88,8 @@ class GameService(GameServiceInterface):
             raise ValueError(
                 "На поле одновременно два победителя - такого быть не может."
             )
-        winner_x = PLAYER_X in winners
-        winner_o = PLAYER_O in winners
+        winner_x = CellValue.PLAYER_X in winners
+        winner_o = CellValue.PLAYER_O in winners
 
         if previous is not None:
             if previous.winners():
@@ -103,7 +102,7 @@ class GameService(GameServiceInterface):
                     old, new = previous.matrix[r][c], matrix[r][c]
                     if old == new:
                         continue
-                    if old == EMPTY:
+                    if old == CellValue.EMPTY:
                         added.append((r, c))
                     else:
                         changed.append((r, c))
@@ -116,7 +115,7 @@ class GameService(GameServiceInterface):
                     f"За один запрос нужно добавить ровно один ход, добавлено: {len(added)}."
                 )
             r, c = added[0]
-            if matrix[r][c] != PLAYER_X:
+            if matrix[r][c] != CellValue.PLAYER_X:
                 raise ValueError(
                     "Пользователь играет за X (1): новый ход должен ставить метку 1."
                 )

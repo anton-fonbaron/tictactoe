@@ -1,9 +1,9 @@
-"""Доменная модель текущей игры."""
+from __future__ import annotations
 
 from dataclasses import dataclass
 from uuid import UUID
 
-from tictactoe.domain.model.game_field import PLAYER_O, PLAYER_X, GameField
+from tictactoe.domain.model.game_field import CellValue, GameField
 
 
 @dataclass(slots=True)
@@ -16,14 +16,15 @@ class CurrentGame:
     id: UUID
     field: GameField
 
-    def copy(self) -> "CurrentGame":
+    def copy(self) -> CurrentGame:
         return CurrentGame(id=self.id, field=self.field.copy())
 
     @property
-    def current_mark(self) -> int:
+    def current_mark(self) -> CellValue:
         """Чей ход должен быть сейчас (X при равенстве меток, иначе O)."""
         return (
-            PLAYER_X
-            if self.field.count(PLAYER_X) == self.field.count(PLAYER_O)
-            else PLAYER_O
+            CellValue.PLAYER_X
+            if self.field.count(CellValue.PLAYER_X)
+            == self.field.count(CellValue.PLAYER_O)
+            else CellValue.PLAYER_O
         )

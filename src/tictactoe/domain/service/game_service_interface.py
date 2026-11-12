@@ -1,5 +1,3 @@
-"""Интерфейс сервиса бизнес-логики крестиков-ноликов."""
-
 from abc import ABC, abstractmethod
 from uuid import UUID
 

@@ -1,60 +1,48 @@
-"""Доменная модель игрового поля: целочисленная матрица 3x3."""
+from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-EMPTY = 0
-PLAYER_X = 1
-PLAYER_O = 2
-SIZE = 3
-
-WIN_LINES = [
-    ((0, 0), (0, 1), (0, 2)),
-    ((1, 0), (1, 1), (1, 2)),
-    ((2, 0), (2, 1), (2, 2)),
-    ((0, 0), (1, 0), (2, 0)),
-    ((0, 1), (1, 1), (2, 1)),
-    ((0, 2), (1, 2), (2, 2)),
-    ((0, 0), (1, 1), (2, 2)),
-    ((0, 2), (1, 1), (2, 0)),
-]
+from tictactoe.common.constants import SIZE, WIN_LINES, CellValue
 
 
 @dataclass(slots=True)
 class GameField:
-    """Игровое поле - целочисленная матрица 3x3 (0 - пусто, 1 - X, 2 - O)."""
-
-    matrix: list[list[int]] = field(
-        default_factory=lambda: [[EMPTY] * SIZE for _ in range(SIZE)]
+    matrix: list[list[CellValue]] = field(
+        default_factory=lambda: [[CellValue.EMPTY] * SIZE for _ in range(SIZE)]
     )
 
-    def copy(self) -> "GameField":
+    def copy(self) -> GameField:
         return GameField([row[:] for row in self.matrix])
-
-    def is_empty_cell(self, row: int, col: int) -> bool:
-        return self.matrix[row][col] == EMPTY
 
     def free_cells(self) -> list[tuple[int, int]]:
         return [
-            (r, c)
-            for r in range(SIZE)
-            for c in range(SIZE)
-            if self.matrix[r][c] == EMPTY
+            (row, col)
+            for row in range(SIZE)
+            for col in range(SIZE)
+            if self.matrix[row][col] == CellValue.EMPTY
         ]
 
-    def winners(self) -> set[int]:
-        result: set[int] = set()
-        for (r1, c1), (r2, c2), (r3, c3) in WIN_LINES:
-            v = self.matrix[r1][c1]
-            if v != EMPTY and v == self.matrix[r2][c2] == self.matrix[r3][c3]:
-                result.add(v)
+    def winners(self) -> set[CellValue]:
+        result: set[CellValue] = set()
+        for (row1, col1), (row2, col2), (row3, col3) in WIN_LINES:
+            candidate = self.matrix[row1][col1]
+            if (
+                candidate != CellValue.EMPTY
+                and candidate == self.matrix[row2][col2] == self.matrix[row3][col3]
+            ):
+                result.add(candidate)
         return result
 
-    def winner(self) -> int | None:
+    def winner(self) -> CellValue | None:
         winners = self.winners()
         return next(iter(winners)) if winners else None
 
     def is_full(self) -> bool:
-        return all(self.matrix[r][c] != EMPTY for r in range(SIZE) for c in range(SIZE))
+        return all(
+            self.matrix[row][col] != CellValue.EMPTY
+            for row in range(SIZE)
+            for col in range(SIZE)
+        )
 
-    def count(self, mark: int) -> int:
+    def count(self, mark: CellValue) -> int:
         return sum(row.count(mark) for row in self.matrix)
