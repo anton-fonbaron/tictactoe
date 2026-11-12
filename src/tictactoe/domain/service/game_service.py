@@ -1,13 +1,8 @@
-"""Реализация сервиса бизнес-логики, принимающая репозиторий через конструктор."""
-
 from uuid import UUID, uuid4
 
+from tictactoe.common.constants import SIZE, CellValue
 from tictactoe.domain.model.current_game import CurrentGame
-from tictactoe.domain.model.game_field import (
-    SIZE,
-    CellValue,
-    GameField,
-)
+from tictactoe.domain.model.game_field import GameField
 from tictactoe.domain.repository.game_repository_interface import (
     GameRepositoryInterface,
 )
@@ -16,8 +11,6 @@ from tictactoe.domain.service.minimax import find_best_move
 
 
 class GameService(GameServiceInterface):
-    """Сервис крестиков-ноликов поверх репозитория текущих игр."""
-
     def __init__(self, repository: GameRepositoryInterface) -> None:
         self._repository = repository
 
@@ -97,15 +90,16 @@ class GameService(GameServiceInterface):
 
             changed: list[tuple[int, int]] = []
             added: list[tuple[int, int]] = []
-            for r in range(SIZE):
-                for c in range(SIZE):
-                    old, new = previous.matrix[r][c], matrix[r][c]
-                    if old == new:
+            for row in range(SIZE):
+                for column in range(SIZE):
+                    old_value = previous.matrix[row][column]
+                    new_value = matrix[row][column]
+                    if old_value == new_value:
                         continue
-                    if old == CellValue.EMPTY:
-                        added.append((r, c))
+                    if old_value == CellValue.EMPTY:
+                        added.append((row, column))
                     else:
-                        changed.append((r, c))
+                        changed.append((row, column))
             if changed:
                 raise ValueError(
                     f"Изменены предыдущие ходы: клетки {changed}. Это запрещено."
@@ -114,8 +108,8 @@ class GameService(GameServiceInterface):
                 raise ValueError(
                     f"За один запрос нужно добавить ровно один ход, добавлено: {len(added)}."
                 )
-            r, c = added[0]
-            if matrix[r][c] != CellValue.PLAYER_X:
+            row, col = added[0]
+            if matrix[row][col] != CellValue.PLAYER_X:
                 raise ValueError(
                     "Пользователь играет за X (1): новый ход должен ставить метку 1."
                 )

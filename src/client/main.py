@@ -1,11 +1,7 @@
 import requests
+from tictactoe.common.constants import EMPTY, PLAYER_O, PLAYER_X
 
 BASE = "http://127.0.0.1:5000"
-
-
-EMPTY = 0
-PLAYER_X = 1
-PLAYER_O = 2
 
 SYMBOL = {EMPTY: " ", PLAYER_X: "X", PLAYER_O: "O"}
 
@@ -30,17 +26,17 @@ def print_info():
 
 
 def render(matrix):
-    """Рисует доску с индексами строк/столбцов и клетками."""
     out = ["      0   1   2", "    +---+---+---+"]
-    for r, row in enumerate(matrix):
-        out.append(f"  {r} | " + " | ".join(SYMBOL[v] for v in row) + " |")
+    for row_index, row in enumerate(matrix):
+        out.append(
+            f"  {row_index} | " + " | ".join(SYMBOL[value] for value in row) + " |"
+        )
         out.append("    +---+---+---+")
     return "\n".join(out)
 
 
 def ask_move(matrix):
-    """Читает ход, пока пользователь не введёт корректную свободную клетку."""
-    n = len(matrix)
+    size = len(matrix)
     while True:
         raw = input("Ваш ход (строка столбец): ").strip().replace(",", " ")
         parts = raw.split()
@@ -48,17 +44,17 @@ def ask_move(matrix):
             print("  Нужно ровно два числа: строка и столбец.")
             continue
         try:
-            r, c = int(parts[0]), int(parts[1])
+            row, column = int(parts[0]), int(parts[1])
         except ValueError:
             print("  Введите целые числа (0..2).")
             continue
-        if not (0 <= r < n and 0 <= c < n):
-            print(f"  Координаты должны быть в диапазоне 0..{n - 1}.")
+        if not (0 <= row < size and 0 <= column < size):
+            print(f"  Координаты должны быть в диапазоне 0..{size - 1}.")
             continue
-        if matrix[r][c] != EMPTY:
+        if matrix[row][column] != EMPTY:
             print("  Клетка уже занята, выберите другую.")
             continue
-        return r, c
+        return row, column
 
 
 def result_text(winner):
@@ -71,7 +67,7 @@ def result_text(winner):
 
 def main():
     game = requests.post(f"{BASE}/game").json()
-    gid = game["id"]
+    game_id = game["id"]
     matrix = game["field"]["matrix"]
 
     print_info()
@@ -81,17 +77,17 @@ def main():
         print(render(matrix))
         print()
 
-        r, c = ask_move(matrix)
-        matrix[r][c] = PLAYER_X
+        row, column = ask_move(matrix)
+        matrix[row][column] = PLAYER_X
 
         game = requests.post(
-            f"{BASE}/game/{gid}",
+            f"{BASE}/game/{game_id}",
             json={"field": {"matrix": matrix}},
         ).json()
 
         if "error" in game:
             print("Ошибка:", game["error"])
-            matrix[r][c] = EMPTY
+            matrix[row][column] = EMPTY
             continue
 
         matrix = game["field"]["matrix"]

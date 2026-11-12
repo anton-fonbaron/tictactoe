@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 
@@ -6,5 +8,5 @@ class GameFieldModel:
     matrix: list[list[int]]
 
     @staticmethod
-    def empty() -> "GameFieldModel":
+    def empty() -> GameFieldModel:
         return GameFieldModel(matrix=[[0] * 3 for _ in range(3)])

@@ -3,16 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from uuid import UUID
 
-from tictactoe.domain.model.game_field import CellValue, GameField
+from tictactoe.common.constants import CellValue
+from tictactoe.domain.model.game_field import GameField
 
 
 @dataclass(slots=True)
 class CurrentGame:
-    """Текущая игра: идентификатор (UUID) и игровое поле.
-
-    Человек играет за X, компьютер - за O. X ходит первым.
-    """
-
     id: UUID
     field: GameField
 
